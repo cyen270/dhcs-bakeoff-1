@@ -71,12 +71,23 @@ void draw()
 
   fill(255); //set fill color to white
   text((trialNum + 1) + " of " + trials.size(), 40, 20); //display what trial the user is on
+  cursor(HAND);
 
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
+    
+  Rectangle bounds = getButtonLocation(trials.get(trialNum));
 
-  fill(255, 0, 0, 200); // set fill color to translucent red
-  ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
+   //check to see if mouse cursor is inside button 
+  if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
+  {
+    drawBig(trials.get(trialNum));
+  }
+ //can do stuff everytime the mouse is moved (i.e., not clicked)
+ //https://processing.org/reference/mouseMoved_.html
+
+  //fill(255, 0, 0, 200); // set fill color to translucent red
+  //ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
 }
 
 void mousePressed() // test to see if hit was in target!
@@ -115,7 +126,7 @@ void mousePressed() // test to see if hit was in target!
   trialNum++; //Increment trial number
 
   //in this example code, we move the mouse back to the middle
-  robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
+  //robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
 }  
 
 //probably shouldn't have to edit this method
@@ -126,24 +137,31 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
    return new Rectangle(x, y, buttonSize, buttonSize);
 }
 
+void drawBig(int i)
+{
+  Rectangle bounds = getButtonLocation(i);
+  fill(0,0,255);
+  rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
+}
+
 //you can edit this method to change how buttons appear
 void drawButton(int i)
 {
   Rectangle bounds = getButtonLocation(i);
-
   if (trials.get(trialNum) == i) // see if current button is the target
     fill(0, 255, 255); // if so, fill cyan
+  else if ((trialNum < 15) && (trials.get(trialNum+1) == i)) {
+    fill(128, 128, 128);
+  }
   else
     fill(200); // if not, fill gray
+  
 
   rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
 }
 
-void mouseMoved()
-{
-   //can do stuff everytime the mouse is moved (i.e., not clicked)
-   //https://processing.org/reference/mouseMoved_.html
-}
+
+
 
 void mouseDragged()
 {
@@ -153,6 +171,41 @@ void mouseDragged()
 
 void keyPressed() 
 {
+  if (keyCode == ' ') {
+    if (trialNum >= trials.size()) //if task is over, just return
+    return;
+    
+    if (trialNum == 0) //check if first click, if so, start timer
+    startTime = millis();
+    
+    if (trialNum == trials.size() - 1) //check if final click
+    {
+    finishTime = millis();
+    //write to terminal some output:
+    println("Hits: " + hits);
+    println("Misses: " + misses);
+    println("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%");
+    println("Total time taken: " + (finishTime-startTime) / 1000f + " sec");
+    println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
+    }
+    
+    Rectangle bounds = getButtonLocation(trials.get(trialNum));
+    
+     //check to see if mouse cursor is inside button 
+    if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
+    {
+    System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
+    hits++; 
+    } 
+    else
+    {
+    System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
+    misses++;
+    }
+    
+    trialNum++; //Increment trial number
+  }
+    
   //can use the keyboard if you wish
   //https://processing.org/reference/keyTyped_.html
   //https://processing.org/reference/keyCode.html
