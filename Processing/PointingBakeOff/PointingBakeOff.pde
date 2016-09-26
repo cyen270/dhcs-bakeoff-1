@@ -1,5 +1,6 @@
 import java.awt.AWTException;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +12,7 @@ int margin = 200; //set the margina around the squares
 final int padding = 50; // padding between buttons and also their width/height
 final int buttonSize = 40; // padding between buttons and also their width/height
 ArrayList<Integer> trials = new ArrayList<Integer>(); //contains the order of buttons that activate in the test
+ArrayList<Boolean> grow = new ArrayList<Boolean>();
 int trialNum = 0; //the current trial number (indexes into trials array above)
 int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
@@ -44,6 +46,10 @@ void setup()
     for (int k = 0; k < numRepeats; k++)
       // number of times each button repeats
       trials.add(i);
+      
+  for (int i = 0; i < 16; i++) {
+      grow.add(false);  
+  }
 
   Collections.shuffle(trials); // randomize the order of the buttons
   System.out.println("trial order: " + trials);
@@ -78,11 +84,11 @@ void draw()
     
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
 
-   //check to see if mouse cursor is inside button 
-  if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
-  {
-    drawBig(trials.get(trialNum));
-  }
+  //check to see if mouse cursor is inside button 
+  //if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
+  //{
+  //  drawBig(trials.get(trialNum));
+  //}
  //can do stuff everytime the mouse is moved (i.e., not clicked)
  //https://processing.org/reference/mouseMoved_.html
 
@@ -137,12 +143,12 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
    return new Rectangle(x, y, buttonSize, buttonSize);
 }
 
-void drawBig(int i)
-{
-  Rectangle bounds = getButtonLocation(i);
-  fill(0,0,255);
-  rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
-}
+//void drawBig(int i)
+//{
+//  Rectangle bounds = getButtonLocation(i);
+//  fill(0,0,255);
+//  rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
+//}
 
 //you can edit this method to change how buttons appear
 void drawButton(int i)
@@ -156,12 +162,37 @@ void drawButton(int i)
   else
     fill(200); // if not, fill gray
   
-
-  rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
+  if (grow.get(i)) {
+    rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
+  } else { 
+    rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
+  }
 }
 
-
-
+void mouseMoved()
+{
+   //can do stuff everytime the mouse is moved (i.e., not clicked)
+   //https://processing.org/reference/mouseMoved_.html
+   
+   if (trialNum >= trials.size()) return;
+   
+   // Make active rectangle larger
+   for (int i = 0; i < 16; i++) {
+     Rectangle cur = getButtonLocation(i);
+     int x = cur.x;
+     int y = cur.y;
+     int w = cur.width;
+     int h = cur.height;
+     
+     if (x <= mouseX && mouseX <= x + w && y <= mouseY && mouseY <= y + h) {
+       grow.set(i, true);
+       drawButton(i);
+     } else {
+       grow.set(i, false);
+     }  
+   }
+   
+}
 
 void mouseDragged()
 {
@@ -172,38 +203,8 @@ void mouseDragged()
 void keyPressed() 
 {
   if (keyCode == ' ') {
-    if (trialNum >= trials.size()) //if task is over, just return
-    return;
-    
-    if (trialNum == 0) //check if first click, if so, start timer
-    startTime = millis();
-    
-    if (trialNum == trials.size() - 1) //check if final click
-    {
-    finishTime = millis();
-    //write to terminal some output:
-    println("Hits: " + hits);
-    println("Misses: " + misses);
-    println("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%");
-    println("Total time taken: " + (finishTime-startTime) / 1000f + " sec");
-    println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
-    }
-    
-    Rectangle bounds = getButtonLocation(trials.get(trialNum));
-    
-     //check to see if mouse cursor is inside button 
-    if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
-    {
-    System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
-    hits++; 
-    } 
-    else
-    {
-    System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
-    misses++;
-    }
-    
-    trialNum++; //Increment trial number
+    robot.mousePress(InputEvent.BUTTON1_MASK);
+    robot.mouseRelease(InputEvent.BUTTON1_MASK);
   }
     
   //can use the keyboard if you wish
