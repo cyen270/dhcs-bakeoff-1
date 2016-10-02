@@ -22,8 +22,6 @@ Robot robot; //initalized in setup
 
 int numRepeats = 1; //sets the number of times each button repeats in the test
 
-boolean printFromClick = false;
-
 void setup()
 {
   size(700, 700); // set the size of the window
@@ -101,7 +99,7 @@ void draw()
      int w = cur.width;
      int h = cur.height;
      
-     if ((x < mouseX) && (mouseX < x + w ) && (y < mouseY) && (mouseY < y + h )) {
+     if ((x <= mouseX) && (mouseX < x + w ) && (y <= mouseY) && (mouseY < y + h )) {
        grow.set(i, true);
        drawButton(i, false);
        if (i == trials.get(trialNum)) {
@@ -140,14 +138,9 @@ void mousePressed() // test to see if hit was in target!
     println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
   }
 
-  printFromClick = true;
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
-  System.out.println("MouseX: " + mouseX);
-  System.out.println("MouseY: " + mouseY);
-  System.out.println("Bounds: x " + bounds.x + ", y" + bounds.y);
-  System.out.println("W " + bounds.width + ", H" + bounds.height);
   
- //check to see if mouse cursor is inside button 
+  //check to see if mouse cursor is inside button 
   if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
@@ -159,8 +152,6 @@ void mousePressed() // test to see if hit was in target!
     misses++;
   }
   
-  printFromClick = false;
-
   trialNum++; //Increment trial number
 
   //in this example code, we move the mouse back to the middle
