@@ -1,4 +1,4 @@
-import java.awt.AWTException;
+ import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.Robot;
@@ -22,10 +22,12 @@ Robot robot; //initalized in setup
 
 int numRepeats = 1; //sets the number of times each button repeats in the test
 
+boolean printFromClick = false;
+
 void setup()
 {
   size(700, 700); // set the size of the window
-  //noCursor(); //hides the system cursor if you want
+  // noCursor(); //hides the system cursor if you want
   noStroke(); //turn off all strokes, we're just using fills here (can change this if you want)
   textFont(createFont("Arial", 16)); //sets the font to Arial size 16
   textAlign(CENTER);
@@ -80,18 +82,16 @@ void draw()
   cursor(HAND);
 
   for (int i = 0; i < 16; i++)// for all button
-    drawButton(i); //draw button
+    drawButton(i, false); //draw button
     
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
   Rectangle bounds_next;
-  if (trialNum < 15) bounds_next = getButtonLocation(trials.get(trialNum+1));
-  else bounds_next = bounds;
+  if (trialNum < numRepeats * 16 - 1) 
+    bounds_next = getButtonLocation(trials.get(trialNum+1));
+  else 
+    bounds_next = bounds;
   fill(0);
-  stroke(0);
-  strokeWeight(5);
-  line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
-  line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
-  noStroke();
+  
   
   // Make active rectangle larger
    for (int i = 0; i < 16; i++) {
@@ -101,20 +101,21 @@ void draw()
      int w = cur.width;
      int h = cur.height;
      
-     if ((x - 25 <= mouseX) && (mouseX <= x + w + 25) && (y - 25 <= mouseY) && (mouseY <= y + h + 25)) {
+     if ((x < mouseX) && (mouseX < x + w ) && (y < mouseY) && (mouseY < y + h )) {
        grow.set(i, true);
-       drawButton(i);
+       drawButton(i, false);
+       if (i == trials.get(trialNum)) {
+         drawButton(i, true); 
+       }
      }
      grow.set(i, false); 
    }
 
-  //check to see if mouse cursor is inside button 
-  //if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
-  //{
-  //  drawBig(trials.get(trialNum));
-  //}
- //can do stuff everytime the mouse is moved (i.e., not clicked)
- //https://processing.org/reference/mouseMoved_.html
+  stroke(0);
+  strokeWeight(5);
+  line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+  line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
+  noStroke();
 
   //fill(255, 0, 0, 200); // set fill color to translucent red
   //ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
@@ -139,19 +140,26 @@ void mousePressed() // test to see if hit was in target!
     println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
   }
 
+  printFromClick = true;
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
-
+  System.out.println("MouseX: " + mouseX);
+  System.out.println("MouseY: " + mouseY);
+  System.out.println("Bounds: x " + bounds.x + ", y" + bounds.y);
+  System.out.println("W " + bounds.width + ", H" + bounds.height);
+  
  //check to see if mouse cursor is inside button 
   if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
     hits++; 
-  } 
+  }  
   else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
     misses++;
   }
+  
+  printFromClick = false;
 
   trialNum++; //Increment trial number
 
@@ -164,35 +172,28 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
 {
    int x = (i % 4) * (padding + buttonSize) + margin;
    int y = (i / 4) * (padding + buttonSize) + margin;
-   if (grow.get(i) == true) {
-     x = (i % 4) * (padding + buttonSize) + margin - 25;
-     y = (i / 4) * (padding + buttonSize) + margin - 25;
-     return new Rectangle(x, y, buttonSize + 50, buttonSize + 50);
-   }
-   return new Rectangle(x, y, buttonSize, buttonSize);
+   return new Rectangle(x - padding / 2, y - padding / 2, buttonSize + padding, buttonSize + padding);
 }
 
-//void drawBig(int i)
-//{
-//  Rectangle bounds = getButtonLocation(i);
-//  fill(0,0,255);
-//  rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
-//}
-
 //you can edit this method to change how buttons appear
-void drawButton(int i)
+void drawButton(int i, boolean isAboveTarget)
 {
   Rectangle bounds = getButtonLocation(i);
-  if (trials.get(trialNum) == i) // see if current button is the target
+  if (isAboveTarget) 
+    fill(100,200,100);
+  else if (trials.get(trialNum) == i) // see if current button is the target
     fill(0, 255, 255); // if so, fill cyan
-  else if ((trialNum < 15) && (trials.get(trialNum+1) == i)) {
-    fill(128, 128, 128);
+  else if ((trialNum < numRepeats * 16 - 1) && (trials.get(trialNum+1) == i)) {
+    fill(115, 115, 115);
   }
   else
     fill(200); // if not, fill gray
   
-  
+  if (grow.get(i)) {
     rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
+  } else {
+    rect(bounds.x + padding / 2, bounds.y + padding / 2, bounds.width - padding, bounds.height - padding);
+  }
   
 }
 
@@ -200,11 +201,7 @@ void mouseMoved()
 {
    //can do stuff everytime the mouse is moved (i.e., not clicked)
    //https://processing.org/reference/mouseMoved_.html
-   
    if (trialNum >= trials.size()) return;
-   
-   
-   
 }
 
 void mouseDragged()
@@ -215,12 +212,8 @@ void mouseDragged()
 
 void keyPressed() 
 {
-  if (keyCode == ' ') {
+  if (key == ' ' || key == 'a') {
     robot.mousePress(InputEvent.BUTTON1_MASK);
     robot.mouseRelease(InputEvent.BUTTON1_MASK);
   }
-    
-  //can use the keyboard if you wish
-  //https://processing.org/reference/keyTyped_.html
-  //https://processing.org/reference/keyCode.html
 }
