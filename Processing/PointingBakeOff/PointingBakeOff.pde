@@ -1,4 +1,4 @@
- import java.awt.AWTException;
+import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.Robot;
