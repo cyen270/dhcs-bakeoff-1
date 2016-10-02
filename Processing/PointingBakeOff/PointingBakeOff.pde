@@ -60,11 +60,11 @@ void setup()
 
 void draw()
 {
-  background(0); //set background to black
+  background(255); //set background to black
 
   if (trialNum >= trials.size()) //check to see if test is over
   {
-    fill(255); //set fill color to white
+    fill(0); //set fill color to white
     //write to screen (not console)
     text("Finished!", width / 2, height / 2); 
     text("Hits: " + hits, width / 2, height / 2 + 20);
@@ -83,6 +83,30 @@ void draw()
     drawButton(i); //draw button
     
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
+  Rectangle bounds_next;
+  if (trialNum < 15) bounds_next = getButtonLocation(trials.get(trialNum+1));
+  else bounds_next = bounds;
+  fill(0);
+  stroke(0);
+  strokeWeight(5);
+  line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+  line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
+  noStroke();
+  
+  // Make active rectangle larger
+   for (int i = 0; i < 16; i++) {
+     Rectangle cur = getButtonLocation(i);
+     int x = cur.x;
+     int y = cur.y;
+     int w = cur.width;
+     int h = cur.height;
+     
+     if ((x - 25 <= mouseX) && (mouseX <= x + w + 25) && (y - 25 <= mouseY) && (mouseY <= y + h + 25)) {
+       grow.set(i, true);
+       drawButton(i);
+     }
+     grow.set(i, false); 
+   }
 
   //check to see if mouse cursor is inside button 
   //if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
@@ -140,6 +164,11 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
 {
    int x = (i % 4) * (padding + buttonSize) + margin;
    int y = (i / 4) * (padding + buttonSize) + margin;
+   if (grow.get(i) == true) {
+     x = (i % 4) * (padding + buttonSize) + margin - 25;
+     y = (i / 4) * (padding + buttonSize) + margin - 25;
+     return new Rectangle(x, y, buttonSize + 50, buttonSize + 50);
+   }
    return new Rectangle(x, y, buttonSize, buttonSize);
 }
 
@@ -162,11 +191,9 @@ void drawButton(int i)
   else
     fill(200); // if not, fill gray
   
-  if (grow.get(i)) {
-    rect(bounds.x - 10, bounds.y - 10, bounds.width + 20, bounds.height + 20);
-  } else { 
+  
     rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
-  }
+  
 }
 
 void mouseMoved()
@@ -176,21 +203,7 @@ void mouseMoved()
    
    if (trialNum >= trials.size()) return;
    
-   // Make active rectangle larger
-   for (int i = 0; i < 16; i++) {
-     Rectangle cur = getButtonLocation(i);
-     int x = cur.x;
-     int y = cur.y;
-     int w = cur.width;
-     int h = cur.height;
-     
-     if (x <= mouseX && mouseX <= x + w && y <= mouseY && mouseY <= y + h) {
-       grow.set(i, true);
-       drawButton(i);
-     } else {
-       grow.set(i, false);
-     }  
-   }
+   
    
 }
 
