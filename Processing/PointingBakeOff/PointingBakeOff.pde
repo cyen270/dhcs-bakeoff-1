@@ -112,8 +112,8 @@ void draw()
   stroke(0);
   strokeWeight(5);
   fill(0);
-  drawpointer(bounds);
-  line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
+  drawpointer(bounds, bounds_next);
+  
   noStroke();
   fill(255);
 
@@ -122,19 +122,48 @@ void draw()
   //ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
 }
 
-void drawpointer(Rectangle bounds) {
+void drawpointer(Rectangle bounds, Rectangle bounds_next) {
   Rectangle upleft = getButtonLocation(0);
   Rectangle botright = getButtonLocation(15);
-  int lower_x = upleft.x + 20;
-  int upper_x = botright.x + botright.width - 20;
-  int lower_y = upleft.y + 20;
-  int upper_y = botright.y + botright.height - 20;
+  int lower_x = upleft.x + 15;
+  int upper_x = botright.x + botright.width - 15;
+  int lower_y = upleft.y + 15;
+  int upper_y = botright.y + botright.height - 15;
   if (mouseX < lower_x) mouseX = lower_x;
   if (mouseX > upper_x) mouseX = upper_x;
   if (mouseY < lower_y) mouseY = lower_y;
   if (mouseY > upper_y) mouseY = upper_y;
   ellipse(mouseX, mouseY, 20, 20);
   line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+  if (trialNum < numRepeats * 16 - 1) {
+    if (trials.get(trialNum+1) != trials.get(trialNum)) {
+      if (trialNum > 0 && (trials.get(trialNum) == trials.get(trialNum-1))) {
+        noFill();
+        beginShape();
+        curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+        curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+        curveVertex(bounds.x + bounds.width / 2 - 20, bounds.y + bounds.width / 2 - 35);
+        curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2 - 50);
+        curveVertex(bounds.x + bounds.width / 2 + 20, bounds.y + bounds.width / 2 - 35);
+        curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+        curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+        endShape();
+      }
+      line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
+    }
+    else {
+      noFill();
+      beginShape();
+      curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+      curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+      curveVertex(bounds.x + bounds.width / 2 - 20, bounds.y + bounds.width / 2 - 35);
+      curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2 - 50);
+      curveVertex(bounds.x + bounds.width / 2 + 20, bounds.y + bounds.width / 2 - 35);
+      curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+      curveVertex(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+      endShape();
+    }
+  }
 }
 
 void mousePressed() // test to see if hit was in target!
@@ -214,7 +243,12 @@ void mouseMoved()
    if (trialNum >= trials.size()) return;
    fill(0);
    Rectangle bounds = getButtonLocation(trials.get(trialNum));
-   drawpointer(bounds);
+   Rectangle bounds_next;
+  if (trialNum < numRepeats * 16 - 1) 
+    bounds_next = getButtonLocation(trials.get(trialNum+1));
+  else 
+    bounds_next = bounds;
+   drawpointer(bounds, bounds_next);
    fill(255);
 }
 
