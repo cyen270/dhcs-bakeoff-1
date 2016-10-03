@@ -20,12 +20,12 @@ int hits = 0; //number of successful clicks
 int misses = 0; //number of missed clicks
 Robot robot; //initalized in setup 
 
-int numRepeats = 1; //sets the number of times each button repeats in the test
+int numRepeats = 3; //sets the number of times each button repeats in the test
 
 void setup()
 {
   size(700, 700); // set the size of the window
-  // noCursor(); //hides the system cursor if you want
+  noCursor(); //hides the system cursor if you want
   noStroke(); //turn off all strokes, we're just using fills here (can change this if you want)
   textFont(createFont("Arial", 16)); //sets the font to Arial size 16
   textAlign(CENTER);
@@ -71,14 +71,14 @@ void draw()
     text("Misses: " + misses, width / 2, height / 2 + 40);
     text("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%", width / 2, height / 2 + 60);
     text("Total time taken: " + (finishTime-startTime) / 1000f + " sec", width / 2, height / 2 + 80);
-    text("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec", width / 2, height / 2 + 100);      
+    text("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec", width / 2, height / 2 + 100);  
+    cursor(HAND);
     return; //return, nothing else to do now test is over
   }
 
   fill(255); //set fill color to white
   text((trialNum + 1) + " of " + trials.size(), 40, 20); //display what trial the user is on
-  cursor(HAND);
-
+  
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i, false); //draw button
     
@@ -111,12 +111,30 @@ void draw()
 
   stroke(0);
   strokeWeight(5);
-  line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
+  fill(0);
+  drawpointer(bounds);
   line(bounds.x + bounds.width / 2, bounds.y + bounds.width / 2, bounds_next.x + bounds_next.width / 2, bounds_next.y + bounds_next.width / 2);
   noStroke();
+  fill(255);
+
 
   //fill(255, 0, 0, 200); // set fill color to translucent red
   //ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
+}
+
+void drawpointer(Rectangle bounds) {
+  Rectangle upleft = getButtonLocation(0);
+  Rectangle botright = getButtonLocation(15);
+  int lower_x = upleft.x + 20;
+  int upper_x = botright.x + botright.width - 20;
+  int lower_y = upleft.y + 20;
+  int upper_y = botright.y + botright.height - 20;
+  if (mouseX < lower_x) mouseX = lower_x;
+  if (mouseX > upper_x) mouseX = upper_x;
+  if (mouseY < lower_y) mouseY = lower_y;
+  if (mouseY > upper_y) mouseY = upper_y;
+  ellipse(mouseX, mouseY, 20, 20);
+  line(mouseX, mouseY, bounds.x + bounds.width / 2, bounds.y + bounds.width / 2);
 }
 
 void mousePressed() // test to see if hit was in target!
@@ -192,7 +210,12 @@ void mouseMoved()
 {
    //can do stuff everytime the mouse is moved (i.e., not clicked)
    //https://processing.org/reference/mouseMoved_.html
+   
    if (trialNum >= trials.size()) return;
+   fill(0);
+   Rectangle bounds = getButtonLocation(trials.get(trialNum));
+   drawpointer(bounds);
+   fill(255);
 }
 
 void mouseDragged()
