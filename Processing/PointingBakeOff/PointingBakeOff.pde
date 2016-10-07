@@ -18,9 +18,12 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 int hits = 0; //number of successful clicks
 int misses = 0; //number of missed clicks
+int start_x = mouseX;
+int start_y = mouseY;
+int movement_time;
 Robot robot; //initalized in setup 
 
-int numRepeats = 3; //sets the number of times each button repeats in the test
+int numRepeats = 25; //sets the number of times each button repeats in the test
 
 void setup()
 {
@@ -53,6 +56,13 @@ void setup()
 
   Collections.shuffle(trials); // randomize the order of the buttons
   System.out.println("trial order: " + trials);
+  System.out.print("Trial\t");
+  System.out.print("Tester \t");
+  System.out.print("Start\t");
+  System.out.print("Target\t");
+  System.out.print("Width\t");
+  System.out.print("Time\t");
+  System.out.println("Outcome\t");
   
   frame.setLocation(0,0); // put window in top left corner of screen (doesn't always work)
 }
@@ -171,33 +181,47 @@ void mousePressed() // test to see if hit was in target!
   if (trialNum >= trials.size()) //if task is over, just return
     return;
 
-  if (trialNum == 0) //check if first click, if so, start timer
+  if (trialNum == 0) {//check if first click, if so, start timer
     startTime = millis();
+    movement_time = millis();
+  }
+  
+  
 
   if (trialNum == trials.size() - 1) //check if final click
   {
     finishTime = millis();
     //write to terminal some output:
-    println("Hits: " + hits);
-    println("Misses: " + misses);
-    println("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%");
-    println("Total time taken: " + (finishTime-startTime) / 1000f + " sec");
-    println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
+    //println("Hits: " + hits);
+    //println("Misses: " + misses);
+    //println("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%");
+    //println("Total time taken: " + (finishTime-startTime) / 1000f + " sec");
+    //println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
   }
 
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
+  System.out.print(trialNum + "\t");
+  System.out.print(1 + "\t");
+  System.out.print("(" + start_x + ", " + start_y + ")\t");
+  System.out.print("(" + (bounds.x + bounds.width / 2) + ", " + (bounds.y + bounds.width / 2) + ")\t");
+  System.out.print(45 + "\t");
+  System.out.print(((millis() - movement_time)/1000f) + "\t");
   
   //check to see if mouse cursor is inside button 
   if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
-    System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
+    System.out.println("Hit");
     hits++; 
   }  
   else
   {
-    System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
+    System.out.println("Miss");
     misses++;
   }
+  
+  movement_time = millis();
+  start_x = mouseX;
+  start_y = mouseY;
   
   trialNum++; //Increment trial number
 
@@ -244,10 +268,10 @@ void mouseMoved()
    fill(0);
    Rectangle bounds = getButtonLocation(trials.get(trialNum));
    Rectangle bounds_next;
-  if (trialNum < numRepeats * 16 - 1) 
-    bounds_next = getButtonLocation(trials.get(trialNum+1));
-  else 
-    bounds_next = bounds;
+   if (trialNum < numRepeats * 16 - 1) 
+     bounds_next = getButtonLocation(trials.get(trialNum+1));
+   else 
+     bounds_next = bounds;
    drawpointer(bounds, bounds_next);
    fill(255);
 }
