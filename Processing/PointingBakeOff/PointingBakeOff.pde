@@ -58,11 +58,13 @@ void setup()
   System.out.println("trial order: " + trials);
   System.out.print("Trial\t");
   System.out.print("Tester \t");
-  System.out.print("Start\t");
-  System.out.print("Target\t");
+  System.out.print("Start X\t");
+  System.out.print("Start Y\t");
+  System.out.print("Target X\t");
+  System.out.print("Target Y\t");
   System.out.print("Width\t");
   System.out.print("Time\t");
-  System.out.println("Outcome\t");
+  System.out.println("Hit\t");
   
   frame.setLocation(0,0); // put window in top left corner of screen (doesn't always work)
 }
@@ -202,20 +204,22 @@ void mousePressed() // test to see if hit was in target!
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
   System.out.print(trialNum + "\t");
   System.out.print(1 + "\t");
-  System.out.print("(" + start_x + ", " + start_y + ")\t");
-  System.out.print("(" + (bounds.x + bounds.width / 2) + ", " + (bounds.y + bounds.width / 2) + ")\t");
+  System.out.print(start_x + "\t");
+  System.out.print(start_y + "\t");
+  System.out.print((bounds.x + bounds.width / 2) + "\t");
+  System.out.print((bounds.y + bounds.width / 2) + "\t");
   System.out.print(45 + "\t");
   System.out.print(((millis() - movement_time)/1000f) + "\t");
   
   //check to see if mouse cursor is inside button 
   if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
-    System.out.println("Hit");
+    System.out.println("True");
     hits++; 
   }  
   else
   {
-    System.out.println("Miss");
+    System.out.println("False");
     misses++;
   }
   
